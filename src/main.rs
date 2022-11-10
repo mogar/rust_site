@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use axum::{
     routing::get,
     Router,
@@ -5,10 +6,22 @@ use axum::{
     http,
     handler::Handler,
 };
+use tracing_subscriber::{
+    layer::SubscriberExt,
+    util::SubscriberInitExt,
+};
 
 #[tokio::main]
 async fn main() {
+    // start tracing
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     println!("Hello, world!");
+
+    // address to bind to
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
 
     // build application with route
     let app = Router::new()
@@ -18,8 +31,8 @@ async fn main() {
         .route("/contact", get(contact))
         .fallback(fallback.into_service());
 
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    // run it with hyper
+    axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
