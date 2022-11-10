@@ -11,6 +11,8 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
+mod blog;
+
 #[tokio::main]
 async fn main() {
     // start tracing
@@ -55,14 +57,14 @@ async fn home() -> Html<String> {
     Html(format!("<p>{}</p>", "Hello world"))
 }
 
-async fn blog_index() -> Html<String> {
-    Html(format!("<p>{}</p>", "Blog Incoming"))
-}
-
-async fn blog_post(axum::extract::Path(slug): axum::extract::Path<String>) -> Html<String> {
-    Html(format!("<p>post id {}</p>", slug))
-}
-
 async fn contact() -> Html<String> {
     Html(format!("<p>{}</p>", "find me here"))
+}
+
+pub async fn blog_index() -> Html<String> {
+    blog::index()
+}
+
+pub async fn blog_post(axum::extract::Path(slug): axum::extract::Path<String>) -> Html<String> {
+    blog::post(slug)
 }
