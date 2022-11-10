@@ -13,7 +13,8 @@ async fn main() {
     // build application with route
     let app = Router::new()
         .route("/", get(home))
-        .route("/blog", get(blog)) // todo: post-level slug
+        .route("/blog", get(blog_index))
+        .route("/blog/:slug", get(blog_post))
         .route("/contact", get(contact))
         .fallback(fallback.into_service());
 
@@ -41,8 +42,12 @@ async fn home() -> Html<String> {
     Html(format!("<p>{}</p>", "Hello world"))
 }
 
-async fn blog() -> Html<String> {
+async fn blog_index() -> Html<String> {
     Html(format!("<p>{}</p>", "Blog Incoming"))
+}
+
+async fn blog_post(axum::extract::Path(slug): axum::extract::Path<String>) -> Html<String> {
+    Html(format!("<p>post id {}</p>", slug))
 }
 
 async fn contact() -> Html<String> {
