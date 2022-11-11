@@ -1,9 +1,8 @@
-use axum::response::Html;
 
-pub fn index() -> Html<String> {
-    Html(format!("<p>{}</p>", "Blog Incoming"))
+pub fn index() -> String {
+    "Blog Incoming".to_string()
 }
 
-pub fn post(slug: String) -> Html<String> {
-    Html(format!("<p>post id {}</p>", slug))
+pub fn post(slug: String) -> String {
+    format!("post id {}", slug)
 }

@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::net::SocketAddr;
 use axum::{
     routing::get,
@@ -10,8 +13,21 @@ use tracing_subscriber::{
     layer::SubscriberExt,
     util::SubscriberInitExt,
 };
+use tera::{Context, Tera};
 
 mod blog;
+
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        match Tera::new("templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error(s): {}", e);
+                ::std::process::exit(1);
+            }
+        }
+    };
+}
 
 #[tokio::main]
 async fn main() {
@@ -52,19 +68,45 @@ async fn shutdown_signal() {
     println!("signal shutdown");
 }
 
+fn get_page_context() -> Context {
+    let mut context = Context::new();
+    context.insert("page_title", &"Mogar");
+    // TODO: other global items (e.g. header, footer, etc.)
+
+    context
+}
+
+fn get_rendered_html(page: &str, context: Context) -> Html<String> {
+    match TEMPLATES.render("base.html", &context) {
+        Ok(s) => Html(s),
+        Err(e) => Html(format!("500: Render failure {:?} for {}", e, page)),
+    }
+}
 
 async fn home() -> Html<String> {
-    Html(format!("<p>{}</p>", "Hello world"))
+    let mut context = get_page_context();
+    context.insert("page_content", &"Hello World!");
+
+    get_rendered_html("home", context)
 }
 
 async fn contact() -> Html<String> {
-    Html(format!("<p>{}</p>", "find me here"))
+    let mut context = get_page_context();
+    context.insert("page_content", &"find me here");
+
+    get_rendered_html("contact", context)
 }
 
 pub async fn blog_index() -> Html<String> {
-    blog::index()
+    let mut context = get_page_context();
+    context.insert("page_content", &blog::index());
+
+    get_rendered_html("blog_index", context)
 }
 
 pub async fn blog_post(axum::extract::Path(slug): axum::extract::Path<String>) -> Html<String> {
-    blog::post(slug)
+    let mut context = get_page_context();
+    context.insert("page_content", &blog::post(slug));
+
+    get_rendered_html("blog_post", context)
 }
