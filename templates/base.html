@@ -13,6 +13,17 @@
     
     </head>
   <body>
+    <div>
+        <!-- TODO: header logo -->
+        <!-- loop of divs for each dest -->
+        {% for link in navbar %}
+        <div>
+            <a href="{{ link }}">
+                {{ link }}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
     <p>{{ page_content }}</p>
   </body>
 </html>

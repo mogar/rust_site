@@ -2,6 +2,12 @@
 
 Experimental project to build a web site in Rust.
 
+## Next Steps
+
+* add custom router (in the form of a MakeService impl)
+* build navbar from the custom router's struct
+* stylesheets
+* markdown ingest for blog
 
 ## Usage
 

@@ -42,6 +42,7 @@ async fn main() {
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
 
     // build application with route
+    // TODO: custom MakeService here
     let app = Router::new()
         .route("/", get(home))
         .route("/blog", get(blog_index))
@@ -57,10 +58,12 @@ async fn main() {
         .unwrap();
 }
 
+/// handler to generate a user-viewable failure message in case of a bad url
 pub async fn fallback(uri: http::Uri) -> impl IntoResponse {
     (http::StatusCode::NOT_FOUND, format!("404: No route {}", uri))
 }
 
+/// safe shutdown handler
 async fn shutdown_signal() {
     tokio::signal::ctrl_c()
         .await
@@ -68,21 +71,29 @@ async fn shutdown_signal() {
     println!("signal shutdown");
 }
 
+/// Prepare global page context (title, navbar, etc.)
+/// Constructs and populates a new Tera context.
 fn get_page_context() -> Context {
     let mut context = Context::new();
     context.insert("page_title", &"Mogar");
+
+    let pagelinks = vec!["/", "/blog", "/contact"];
+    context.insert("navbar", &pagelinks);
     // TODO: other global items (e.g. header, footer, etc.)
 
     context
 }
 
+/// Render the context into a template determined by the current page
 fn get_rendered_html(page: &str, context: Context) -> Html<String> {
+    // NOTE: currently all pages use the same template
     match TEMPLATES.render("base.html", &context) {
         Ok(s) => Html(s),
         Err(e) => Html(format!("500: Render failure {:?} for {}", e, page)),
     }
 }
 
+/// Render and return Html for the home page
 async fn home() -> Html<String> {
     let mut context = get_page_context();
     context.insert("page_content", &"Hello World!");
@@ -90,6 +101,7 @@ async fn home() -> Html<String> {
     get_rendered_html("home", context)
 }
 
+/// Render and return Html for the contact page
 async fn contact() -> Html<String> {
     let mut context = get_page_context();
     context.insert("page_content", &"find me here");
@@ -97,6 +109,7 @@ async fn contact() -> Html<String> {
     get_rendered_html("contact", context)
 }
 
+/// Render and return Html for the blog index
 pub async fn blog_index() -> Html<String> {
     let mut context = get_page_context();
     context.insert("page_content", &blog::index());
@@ -104,6 +117,7 @@ pub async fn blog_index() -> Html<String> {
     get_rendered_html("blog_index", context)
 }
 
+/// Render and return Html for a blog post determined by `slug`
 pub async fn blog_post(axum::extract::Path(slug): axum::extract::Path<String>) -> Html<String> {
     let mut context = get_page_context();
     context.insert("page_content", &blog::post(slug));
