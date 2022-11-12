@@ -106,7 +106,11 @@ async fn home() -> Html<String> {
 /// Render and return Html for the contact page
 async fn contact() -> Html<String> {
     let mut context = get_page_context();
-    context.insert("page_content", &"<p>find me here</p>");
+    context.insert("page_content", &"<ul>
+        <li><a href=\"https://twitter.com/MorgneticField\">Twitter</a></li>
+        <li><a href=\"https://github.com/mogar\">GitHub</a></li>
+        <li><a href=\"https://www.linkedin.com/in/morgan-redfield/\">LinkedIn</a></li>
+    </ul>");
 
     get_rendered_html("contact", context)
 }
