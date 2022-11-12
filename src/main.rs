@@ -19,13 +19,15 @@ mod blog;
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
-        match Tera::new("templates/**/*") {
+        let mut tera = match Tera::new("templates/**/*") {
             Ok(t) => t,
             Err(e) => {
                 println!("Parsing error(s): {}", e);
                 ::std::process::exit(1);
             }
-        }
+        };
+        tera.autoescape_on(vec![]);
+        tera
     };
 }
 
@@ -96,7 +98,7 @@ fn get_rendered_html(page: &str, context: Context) -> Html<String> {
 /// Render and return Html for the home page
 async fn home() -> Html<String> {
     let mut context = get_page_context();
-    context.insert("page_content", &"Hello World!");
+    context.insert("page_content", &"<p>Hello World!</p>");
 
     get_rendered_html("home", context)
 }
@@ -104,7 +106,7 @@ async fn home() -> Html<String> {
 /// Render and return Html for the contact page
 async fn contact() -> Html<String> {
     let mut context = get_page_context();
-    context.insert("page_content", &"find me here");
+    context.insert("page_content", &"<p>find me here</p>");
 
     get_rendered_html("contact", context)
 }
